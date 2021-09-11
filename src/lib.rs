@@ -31,6 +31,17 @@ pub fn flip_file(file: &mut File) -> std::io::Result<u64> {
     Ok(nflipped)
 }
 
+#[cfg(feature = "memmap")]
+pub fn flip_file_mmap(file: &mut File) -> std::io::Result<u64> {
+    let mut mmap = unsafe { memmap::MmapMut::map_mut(&file)? };
+
+    for i in 0..mmap.len() {
+        mmap[i] = !mmap[i];
+    }
+
+    Ok(mmap.len() as u64)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
