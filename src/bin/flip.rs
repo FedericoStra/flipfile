@@ -10,10 +10,14 @@ use flipfile::*;
 /// Flip the bytes in multiple files
 struct Opts {
     /// Verbosity
+    ///
+    /// The verbosity can be controlled explicitly by setting the environment variable `RUST_LOG`.
+    ///
+    /// If `RUST_LOG` is not set, the log level defaults to "info" is --verbose is passed or "warn" otherwise.
     #[structopt(short, long)]
     verbose: bool,
 
-    /// Use mmap
+    /// Uses mmap instead of read/write
     #[cfg(feature = "memmap")]
     #[structopt(short, long)]
     mmap: bool,
@@ -26,14 +30,18 @@ struct Opts {
 fn main() {
     let opts = Opts::from_args();
 
-    if opts.verbose {
-        println!("{:?}", opts);
-    }
+    let default_min_level = if opts.verbose { "info" } else { "warn" };
+
+    let env = env_logger::Env::default().default_filter_or(default_min_level);
+    env_logger::Builder::from_env(env)
+        .format_timestamp(None)
+        .format_target(false)
+        .init();
+
+    log::debug!("opts = {:?}", opts);
 
     for path in opts.paths {
-        if opts.verbose {
-            println!("processing {:?}", path);
-        }
+        log::info!("processing {:?}", path);
 
         match OpenOptions::new().read(true).write(true).open(&path) {
             Ok(mut file) => {
@@ -49,14 +57,12 @@ fn main() {
 
                 match result {
                     Ok(nbytes) => {
-                        if opts.verbose {
-                            println!("flipped {} bytes", nbytes);
-                        }
+                        log::info!(" ↳ flipped {} bytes", nbytes);
                     }
-                    Err(e) => eprintln!("error while processing {:?}: {}", path, e),
+                    Err(e) => log::error!("error while processing {:?}: {}", path, e),
                 }
             }
-            Err(e) => eprintln!("cannot open {:?}: {}", path, e),
+            Err(e) => log::error!("cannot open {:?}: {}", path, e),
         }
     }
 }

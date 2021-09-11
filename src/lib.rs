@@ -7,25 +7,25 @@ pub fn flip_file(file: &mut File) -> std::io::Result<u64> {
     loop {
         let pos = file.stream_position()?;
         let nread = file.read(&mut buffer)?;
-        // dbg!(pos, nread);
-        debug_assert_eq!(pos + nread as u64, file.stream_position().unwrap());
+
+        log::debug!("pos = {}, nread = {}", pos, nread);
+        debug_assert_eq!(pos + nread as u64, file.stream_position()?);
 
         if nread == 0 {
             break;
         }
 
-        // println!("{:?}", buffer);
         for i in 0..nread {
             buffer[i] = !buffer[i];
         }
-        // println!("{:?}\n", buffer);
 
         file.seek(SeekFrom::Start(pos))?;
 
         let nwritten = file.write(&buffer[0..nread])?;
-        // dbg!(nwritten);
 
-        assert_eq!(nread, nwritten);
+        log::trace!("nwritten = {}", nwritten);
+        debug_assert_eq!(nread, nwritten);
+
         nflipped += nread as u64;
     }
     Ok(nflipped)
@@ -35,11 +35,13 @@ pub fn flip_file(file: &mut File) -> std::io::Result<u64> {
 pub fn flip_file_mmap(file: &mut File) -> std::io::Result<u64> {
     let mut mmap = unsafe { memmap::MmapMut::map_mut(&file)? };
 
-    for i in 0..mmap.len() {
+    let len = mmap.len();
+
+    for i in 0..len {
         mmap[i] = !mmap[i];
     }
 
-    Ok(mmap.len() as u64)
+    Ok(len as u64)
 }
 
 #[cfg(test)]
