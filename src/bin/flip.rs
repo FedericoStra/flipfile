@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use structopt::StructOpt;
 
-use flipfile::flip_file;
+use flipfile::*;
 
 #[derive(Debug, StructOpt)]
 #[structopt(setting = structopt::clap::AppSettings::ColoredHelp)]
@@ -12,6 +12,11 @@ struct Opts {
     /// Verbosity
     #[structopt(short, long)]
     verbose: bool,
+
+    /// Use mmap
+    #[cfg(feature = "memmap")]
+    #[structopt(short, long)]
+    mmap: bool,
 
     /// Files to process
     #[structopt()]
@@ -31,14 +36,26 @@ fn main() {
         }
 
         match OpenOptions::new().read(true).write(true).open(&path) {
-            Ok(mut file) => match flip_file(&mut file) {
-                Ok(nbytes) => {
-                    if opts.verbose {
-                        println!("flipped {} bytes", nbytes);
+            Ok(mut file) => {
+                #[cfg(feature = "memmap")]
+                let result = if opts.mmap {
+                    flip_file_mmap(&mut file)
+                } else {
+                    flip_file(&mut file)
+                };
+
+                #[cfg(not(feature = "memmap"))]
+                let result = flip_file(&mut file);
+
+                match result {
+                    Ok(nbytes) => {
+                        if opts.verbose {
+                            println!("flipped {} bytes", nbytes);
+                        }
                     }
+                    Err(e) => eprintln!("error while processing {:?}: {}", path, e),
                 }
-                Err(e) => eprintln!("error while processing {:?}: {}", path, e),
-            },
+            }
             Err(e) => eprintln!("cannot open {:?}: {}", path, e),
         }
     }
