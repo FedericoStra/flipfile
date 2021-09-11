@@ -1,6 +1,6 @@
 [package]
 name = "flipfile"
-version = "0.1.1-alpha.0"
+version = "0.2.0"
 authors = ["Federico Stra <stra.federico@gmail.com>"]
 description = "Flip the bytes in multiple files"
 license = "MIT"
