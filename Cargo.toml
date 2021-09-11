@@ -1,0 +1,17 @@
+[package]
+name = "flipfile"
+version = "0.1.0"
+authors = ["Federico Stra <stra.federico@gmail.com>"]
+description = "Flip the bytes in multiple files"
+license = "MIT"
+edition = "2018"
+keywords = ["cli", "data"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+structopt = "0.3.22"
+
+[dev-dependencies]
+tempfile = "3.2.0"
