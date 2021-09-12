@@ -1,6 +1,6 @@
 # flipfile
 
-Flip the bytes in multiple files
+Flip the bytes in multiple files.
 
 `flipfile` takes a number of files and transforms each byte.
 
