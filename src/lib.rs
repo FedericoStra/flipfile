@@ -1,13 +1,22 @@
+//! Flip the bytes in multiple files.
+
+#![cfg_attr(doc_cfg, feature(doc_cfg))]
+
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 
+/// Operations to apply to every byte.
 #[derive(Debug, Default)]
 pub struct Operations {
+    /// Flip the bytes, i.e. negates each bit.
     pub flip: bool,
+    /// Reverse the bytes.
     pub reverse: bool,
+    /// Swab the bytes, i.e. swap the first 4 and the last 4 bits.
     pub swab: bool,
 }
 
+/// Transform each byte in `buffer` according to the operations specified in `ops`.
 pub fn process_buffer(buffer: &mut [u8], ops: &Operations) {
     if ops.flip {
         for b in buffer.iter_mut() {
@@ -39,6 +48,10 @@ pub fn process_buffer(buffer: &mut [u8], ops: &Operations) {
     }
 }
 
+/// Transform each byte in `file` according to the operations specified in `ops`.
+///
+/// The file is read through a buffer, which is then transformed via
+/// [`process_buffer`](process_buffer) and written back to the file.
 pub fn process_file(file: &mut File, ops: &Operations) -> std::io::Result<u64> {
     log::debug!("ops = {:?}", ops);
 
@@ -69,6 +82,20 @@ pub fn process_file(file: &mut File, ops: &Operations) -> std::io::Result<u64> {
     Ok(nflipped)
 }
 
+/// Transform each byte in `file` according to the operations specified in `ops`.
+///
+/// The file is memory mapped and transformed via [`process_buffer`](process_buffer).
+#[cfg(feature = "memmap")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "memmap")))]
+pub fn process_file_mmap(file: &mut File, ops: &Operations) -> std::io::Result<u64> {
+    let mut mmap = unsafe { memmap::MmapMut::map_mut(&file)? };
+
+    process_buffer(&mut mmap, ops);
+
+    Ok(mmap.len() as u64)
+}
+
+#[deprecated = "use [`process_file`](process_file) instead"]
 pub fn flip_file(file: &mut File) -> std::io::Result<u64> {
     let mut nflipped = 0;
     let mut buffer = [0; 1024 * 256];
@@ -99,22 +126,15 @@ pub fn flip_file(file: &mut File) -> std::io::Result<u64> {
     Ok(nflipped)
 }
 
+#[deprecated = "use [`process_file_mmap`](process_file_mmap) instead"]
 #[cfg(feature = "memmap")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "memmap")))]
 pub fn flip_file_mmap(file: &mut File) -> std::io::Result<u64> {
     let mut mmap = unsafe { memmap::MmapMut::map_mut(&file)? };
 
     for b in mmap.iter_mut() {
         *b = !*b;
     }
-
-    Ok(mmap.len() as u64)
-}
-
-#[cfg(feature = "memmap")]
-pub fn process_file_mmap(file: &mut File, ops: &Operations) -> std::io::Result<u64> {
-    let mut mmap = unsafe { memmap::MmapMut::map_mut(&file)? };
-
-    process_buffer(&mut mmap, ops);
 
     Ok(mmap.len() as u64)
 }
