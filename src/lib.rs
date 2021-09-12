@@ -1,4 +1,6 @@
 //! Flip the bytes in multiple files.
+//!
+//! This crate ships with a default binary `flipfile` that lets you flip multiple files.
 
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 
@@ -8,7 +10,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 /// Operations to apply to every byte.
 #[derive(Debug, Default)]
 pub struct Operations {
-    /// Flip the bytes, i.e. negates each bit.
+    /// Flip the bytes, i.e. negate each bit.
     pub flip: bool,
     /// Reverse the bytes.
     pub reverse: bool,

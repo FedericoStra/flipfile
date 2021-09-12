@@ -27,7 +27,7 @@ struct Options {
     #[structopt(short, long)]
     mmap: bool,
 
-    /// Flip (negate) the bytes
+    /// Flip the bytes, i.e. negate each bit
     #[structopt(short, long)]
     flip: bool,
 
@@ -35,7 +35,7 @@ struct Options {
     #[structopt(short, long)]
     reverse: bool,
 
-    /// Swab the bytes
+    /// Swab the bytes, i.e. swap the first 4 and the last 4 bits
     #[structopt(short, long)]
     swab: bool,
 
