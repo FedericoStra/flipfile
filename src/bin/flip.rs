@@ -6,7 +6,12 @@ use structopt::StructOpt;
 use flipfile::*;
 
 #[derive(Debug, StructOpt)]
-#[structopt(setting = structopt::clap::AppSettings::ColoredHelp)]
+#[structopt(
+    setting = structopt::clap::AppSettings::ColoredHelp,
+    after_help = "If none of -f, -r or -s is explicitly passed, then -f is implicitly set.",
+    help_message = "Print help information",
+    version_message = "Print version information",
+)]
 /// Flip the bytes in multiple files
 struct Options {
     /// Verbosity
