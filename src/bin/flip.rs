@@ -22,7 +22,7 @@ struct Options {
     #[structopt(short, long)]
     mmap: bool,
 
-    /// Flip (negates) the bytes
+    /// Flip (negate) the bytes
     #[structopt(short, long)]
     flip: bool,
 
@@ -30,21 +30,27 @@ struct Options {
     #[structopt(short, long)]
     reverse: bool,
 
+    /// Swab the bytes
+    #[structopt(short, long)]
+    swab: bool,
+
     /// Files to process
     #[structopt()]
     paths: Vec<PathBuf>,
 }
 
 fn operations(opts: &Options) -> Operations {
-    if !(opts.flip | opts.reverse) {
+    if !(opts.flip | opts.reverse | opts.swab) {
         Operations {
             flip: true,
             reverse: false,
+            swab: false,
         }
     } else {
         Operations {
             flip: opts.flip,
             reverse: opts.reverse,
+            swab: opts.swab,
         }
     }
 }

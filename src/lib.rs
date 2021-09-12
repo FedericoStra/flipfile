@@ -5,6 +5,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 pub struct Operations {
     pub flip: bool,
     pub reverse: bool,
+    pub swab: bool,
 }
 
 pub fn process_buffer(buffer: &mut [u8], ops: &Operations) {
@@ -14,12 +15,25 @@ pub fn process_buffer(buffer: &mut [u8], ops: &Operations) {
         }
     }
 
-    if ops.reverse {
+    if ops.reverse & ops.swab {
+        for b in buffer.iter_mut() {
+            let mut t = *b;
+            t = (t & 0xCC) >> 2 | (t & 0x33) << 2;
+            t = (t & 0xAA) >> 1 | (t & 0x55) << 1;
+            *b = t;
+        }
+    } else if ops.reverse {
         for b in buffer.iter_mut() {
             let mut t = *b;
             t = (t & 0xF0) >> 4 | (t & 0x0F) << 4;
             t = (t & 0xCC) >> 2 | (t & 0x33) << 2;
             t = (t & 0xAA) >> 1 | (t & 0x55) << 1;
+            *b = t;
+        }
+    } else if ops.swab {
+        for b in buffer.iter_mut() {
+            let mut t = *b;
+            t = (t & 0xF0) >> 4 | (t & 0x0F) << 4;
             *b = t;
         }
     }
