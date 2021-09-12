@@ -146,6 +146,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(deprecated)]
     fn test_flip_file() -> std::io::Result<()> {
         let mut file = tempfile::tempfile()?;
         for i in 0..255 {
@@ -164,6 +165,7 @@ mod tests {
 
     #[test]
     #[cfg(feature = "memmap")]
+    #[allow(deprecated)]
     fn test_flip_file_mmap() -> std::io::Result<()> {
         let mut file = tempfile::tempfile()?;
         for i in 0..255 {
