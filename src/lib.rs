@@ -20,29 +20,23 @@ pub struct Operations {
 
 /// Transform each byte in `buffer` according to the operations specified in `ops`.
 pub fn process_buffer(buffer: &mut [u8], ops: &Operations) {
-    if ops.flip {
-        for b in buffer.iter_mut() {
+    for b in buffer.iter_mut() {
+        if ops.flip {
             *b = !*b;
         }
-    }
 
-    if ops.reverse & ops.swab {
-        for b in buffer.iter_mut() {
+        if ops.reverse & ops.swab {
             let mut t = *b;
             t = (t & 0xCC) >> 2 | (t & 0x33) << 2;
             t = (t & 0xAA) >> 1 | (t & 0x55) << 1;
             *b = t;
-        }
-    } else if ops.reverse {
-        for b in buffer.iter_mut() {
+        } else if ops.reverse {
             let mut t = *b;
             t = (t & 0xF0) >> 4 | (t & 0x0F) << 4;
             t = (t & 0xCC) >> 2 | (t & 0x33) << 2;
             t = (t & 0xAA) >> 1 | (t & 0x55) << 1;
             *b = t;
-        }
-    } else if ops.swab {
-        for b in buffer.iter_mut() {
+        } else if ops.swab {
             let mut t = *b;
             t = (t & 0xF0) >> 4 | (t & 0x0F) << 4;
             *b = t;
